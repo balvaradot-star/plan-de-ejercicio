@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Calistenia Militar - Desafío 15 Minutos</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons (Web component/UMD for safety) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Custom animations for the breathing pacer */
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); background-color: #064e3b; }
+      50% { transform: scale(1.35); background-color: #047857; }
+    }
+    .animate-breathe {
+      animation: breathe 5s infinite ease-in-out;
+    }
+    /* Hide scrollbars for slick mobile app look */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Touch active state feedback */
+    .btn-active:active {
+      transform: scale(0.96);
+    }
+    /* Blueprint line glow effect */
+    .blueprint-line {
+      filter: drop-shadow(0px 0px 1px #10b981);
+    }
+    .blueprint-accent {
+      filter: drop-shadow(0px 0px 1px #38bdf8);
+    }
+    /* Radar alarm glow */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 1; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+    .alarm-glow {
+      animation: pulse-ring 1.5s infinite ease-out;
+    }
+    /* Wave animation for hydration */
+    @keyframes wave {
+      0%, 100% { transform: translateY(0) scaleY(1); }
+      50% { transform: translateY(-5px) scaleY(1.05); }
+    }
+    .water-wave {
+      animation: wave 4s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="h-full text-slate-100 flex flex-col font-sans select-none antialiased">
+
+  <!-- APP CONTAINER -->
+  <div class="max-w-md w-full mx-auto bg-slate-900 flex flex-col h-full shadow-2xl overflow-hidden relative">
+    
+    <!-- HEADER -->
+    <header class="bg-slate-950 border-b border-slate-800 px-4 py-3 flex items-center justify-between shrink-0 z-30">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/30">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-alert"><path d="M20 13c0 5-3.5 7.5-7.66 9.7a1 1 0 0 1-.68 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 .76-.97l8-2a1 1 0 0 1 .48 0l8 2A1 1 0 0 1 20 6z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+        </div>
+        <div>
+          <h1 class="font-black text-sm tracking-widest text-slate-200 uppercase">MISIÓN 15 MINUTOS</h1>
+          <p class="text-xs text-amber-400 font-semibold">Lunes a Viernes | Quema Grasa</p>
+        </div>
+      </div>
+      <button onclick="toggleSafetyModal()" class="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold flex items-center gap-1 btn-active transition-all">
+        <i data-lucide="info" class="w-4 h-4"></i> INFO
+      </button>
+    </header>
+
+    <!-- ALARM BAR STATUS INDICATOR -->
+    <div id="alarm-banner" class="bg-emerald-950/40 border-b border-slate-800/60 px-4 py-1.5 flex items-center justify-between text-[11px] text-slate-300 hidden z-20">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+        <span>Recordatorio diario activo a las <strong id="alarm-banner-time">--:--</strong></span>
+      </div>
+      <button onclick="switchTab('ajustes')" class="text-emerald-400 font-semibold hover:underline">Ajustar</button>
+    </div>
+
+    <!-- MAIN INTERACTIVE CONTENT AREA -->
+    <main class="flex-1 overflow-y-auto no-scrollbar pb-28">
+      
+      <!-- HERO ADHERENCE & WEEKLY STATUS -->
+      <section class="p-4 bg-gradient-to-b from-slate-950 to-slate-900">
+        <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Plan de Reducción de Peso</span>
+            <h2 class="text-2xl font-bold text-white mt-0.5" id="weekly-percentage">0% de Misión</h2>
+            <p class="text-xs text-emerald-400 mt-1 font-semibold" id="streak-counter">Meta diaria: 15 minutos continuos</p>
+          </div>
+          <!-- Radial Progress Circle -->
+          <div class="relative w-16 h-16 flex items-center justify-center">
+            <svg class="w-full h-full transform -rotate-90">
+              <circle cx="32" cy="32" r="28" stroke="currentColor" class="text-slate-700" stroke-width="4" fill="transparent" />
+              <circle cx="32" cy="32" r="28" stroke="currentColor" class="text-emerald-500 transition-all duration-500" stroke-width="4" fill="transparent" stroke-dasharray="175.92" stroke-dashoffset="175.92" id="progress-ring-circle" />
+            </svg>
+            <span class="absolute text-[10px] font-bold text-slate-300 uppercase">30 Días</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB SELECTION: WEEKDAYS -->
+      <section class="px-4 py-1 shrink-0 overflow-x-auto no-scrollbar">
+        <div class="flex gap-2 min-w-max">
+          <!-- Days populated via JS -->
+          <div id="day-tabs" class="flex gap-1.5 w-full"></div>
+        </div>
+      </section>
+
+      <!-- ACTIVE WORKOUT CONTENT -->
+      <section class="p-4 flex flex-col gap-4">
+        <!-- Day Banner -->
+        <div class="p-4 rounded-xl flex justify-between items-center transition-colors duration-300" id="day-banner-bg">
+          <div>
+            <h3 class="text-lg font-black tracking-wide text-white" id="current-day-name">LUNES</h3>
+            <p class="text-xs font-semibold" id="current-day-type">SESIÓN A</p>
+          </div>
+          <span class="text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider" id="current-day-status-pill">Pendiente</span>
+        </div>
+
+        <!-- WATER INTAKE TRACKER -->
+        <div id="water-tracker-card" class="bg-slate-950 border border-blue-500/20 rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between border-b border-slate-800/60 pb-2">
+            <span class="text-[10px] text-blue-400 font-extrabold uppercase tracking-widest flex items-center gap-1">
+              <i data-lucide="droplet" class="w-3.5 h-3.5"></i> Misión Hidratación (6 AM - 6 PM)
+            </span>
+            <span id="water-progress-text" class="text-[10px] text-slate-300 font-black px-2 py-0.5 bg-blue-950/40 rounded border border-blue-500/20">0 / 2.5 Litros</span>
+          </div>
+          
+          <div class="flex justify-between items-center px-1">
+            <div class="flex flex-col">
+              <span class="text-xs font-bold text-slate-200">Meta: 2.5 Litros Diarios</span>
+              <span class="text-[10px] text-slate-400 mt-0.5">Divide el consumo en tus horarios clave</span>
+            </div>
+            <button onclick="resetWaterProgress()" class="p-1.5 bg-slate-900 text-slate-500 rounded hover:text-blue-400 transition-colors btn-active">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <!-- Glass Icons Grid -->
+          <div class="grid grid-cols-5 gap-2 mt-1">
+            <button onclick="toggleWaterGlass(0)" id="glass-0" class="py-2.5 rounded-xl border border-slate-800 bg-slate-950 flex flex-col items-center justify-center gap-1 btn-active transition-all text-slate-500">
+              <i data-lucide="cup-soda" class="w-5 h-5"></i>
+              <span class="text-[9px] font-black uppercase">6:00 AM</span>
+            </button>
+            <button onclick="toggleWaterGlass(1)" id="glass-1" class="py-2.5 rounded-xl border border-slate-800 bg-slate-950 flex flex-col items-center justify-center gap-1 btn-active transition-all text-slate-500">
+              <i data-lucide="cup-soda" class="w-5 h-5"></i>
+              <span class="text-[9px] font-black uppercase">9:00 AM</span>
+            </button>
+            <button onclick="toggleWaterGlass(2)" id="glass-2" class="py-2.5 rounded-xl border border-slate-800 bg-slate-950 flex flex-col items-center justify-center gap-1 btn-active transition-all text-slate-500">
+              <i data-lucide="cup-soda" class="w-5 h-5"></i>
+              <span class="text-[9px] font-black uppercase">12:00 PM</span>
+            </button>
+            <button onclick="toggleWaterGlass(3)" id="glass-3" class="py-2.5 rounded-xl border border-slate-800 bg-slate-950 flex flex-col items-center justify-center gap-1 btn-active transition-all text-slate-500">
+              <i data-lucide="cup-soda" class="w-5 h-5"></i>
+              <span class="text-[9px] font-black uppercase">3:00 PM</span>
+            </button>
+            <button onclick="toggleWaterGlass(4)" id="glass-4" class="py-2.5 rounded-xl border border-slate-800 bg-slate-950 flex flex-col items-center justify-center gap-1 btn-active transition-all text-slate-500">
+              <i data-lucide="cup-soda" class="w-5 h-5"></i>
+              <span class="text-[9px] font-black uppercase">6:00 PM</span>
+            </button>
+          </div>
+          
+          <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden mt-1">
+            <div id="water-progress-bar" class="bg-blue-500 h-full w-0 transition-all duration-300"></div>
+          </div>
+        </div>
+
+        <!-- 15 MIN TIMER HUD INTEGRATED ON WORKOUT TAB -->
+        <div id="workout-timer-panel" class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center text-center gap-3">
+          <div class="flex items-center justify-between w-full border-b border-slate-800/60 pb-2">
+            <span class="text-[10px] text-amber-500 font-extrabold uppercase tracking-widest flex items-center gap-1">
+              <i data-lucide="activity" class="w-3.5 h-3.5"></i> Cronómetro de Combate (15 min)
+            </span>
+            <span id="timer-stage" class="text-[10px] text-slate-400 font-bold uppercase px-2 py-0.5 bg-slate-900 rounded border border-slate-800">Calentamiento</span>
+          </div>
+
+          <div class="flex items-center gap-6 my-1">
+            <!-- Large Digital Display -->
+            <div class="flex flex-col">
+              <span class="text-4xl font-mono font-black tracking-widest text-white" id="main-timer-display">15:00</span>
+              <span class="text-[9px] text-slate-500 uppercase tracking-widest mt-0.5">Minutos Restantes</span>
+            </div>
+
+            <!-- Vertical Control Buttons -->
+            <div class="flex gap-2">
+              <button onclick="toggleMainTimer()" id="main-timer-play-btn" class="p-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl btn-active transition-all">
+                <i data-lucide="play" class="w-5 h-5"></i>
+              </button>
+              <button onclick="resetMainTimer()" class="p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl btn-active transition-all">
+                <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+            <div id="main-timer-progress" class="bg-emerald-500 h-full w-full transition-all duration-1000"></div>
+          </div>
+          <p class="text-[11px] text-slate-400">
+            Completa la ronda de ejercicios de forma continua hasta que el cronómetro llegue a 00:00.
+          </p>
+        </div>
+
+        <!-- Dynamic Content (Workout Exercises or Rest Content) -->
+        <div id="workout-content" class="flex flex-col gap-4"></div>
+      </section>
+
+    </main>
+
+    <!-- PERSISTENT FOOTER TABS -->
+    <nav class="bg-slate-950 border-t border-slate-800 grid grid-cols-3 py-2 shrink-0 z-40">
+      <button onclick="switchTab('entrenamiento')" id="nav-entrenamiento" class="flex flex-col items-center justify-center text-emerald-400 transition-colors py-1">
+        <i data-lucide="dumbbell" class="w-5 h-5 mb-1"></i>
+        <span class="text-[10px] font-bold uppercase tracking-wider">Entrenar</span>
+      </button>
+      <button onclick="switchTab('respiracion')" id="nav-respiracion" class="flex flex-col items-center justify-center text-slate-400 transition-colors py-1">
+        <div class="relative flex items-center justify-center">
+          <i data-lucide="wind" class="w-5 h-5 mb-1"></i>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider">Respiración</span>
+      </button>
+      <button onclick="switchTab('ajustes')" id="nav-ajustes" class="flex flex-col items-center justify-center text-slate-400 transition-colors py-1">
+        <i data-lucide="clock" class="w-5 h-5 mb-1"></i>
+        <span class="text-[10px] font-bold uppercase tracking-wider">Alarmas</span>
+      </button>
+    </nav>
+
+    <!-- TAB 2: BREATHING HUB OVERLAY -->
+    <div id="tab-respiracion-content" class="absolute inset-0 bg-slate-950/98 z-20 flex flex-col hidden overflow-y-auto no-scrollbar pb-20">
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+        <h2 class="font-bold text-sm tracking-widest text-slate-200 uppercase">MARCAPASOS DE RESPIRACIÓN</h2>
+        <button onclick="switchTab('entrenamiento')" class="text-xs text-slate-400 border border-slate-800 px-3 py-1 rounded bg-slate-900">Volver</button>
+      </div>
+
+      <div class="flex-1 p-6 flex flex-col items-center justify-center text-center">
+        <!-- Breathing Pacer Bubble -->
+        <div class="relative w-48 h-48 rounded-full flex items-center justify-center mb-8">
+          <div class="absolute inset-0 rounded-full bg-emerald-500/5 border border-emerald-500/20"></div>
+          <div id="pacer-circle" class="w-32 h-32 rounded-full flex items-center justify-center text-white font-extrabold text-lg animate-breathe transition-all duration-300">
+            <span id="pacer-text" class="uppercase tracking-wider text-emerald-300">Inhala</span>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-bold text-emerald-400 mb-2">Escudo de Presión Abdominal</h3>
+        <p class="text-xs text-slate-300 max-w-sm mb-6 leading-relaxed">
+          Mantener la respiración bloqueada eleva drásticamente la presión dentro del abdomen, lo que puede empujar y agravar tu hernia umbilical. Usa este marcapasos táctil para coordinar tu esfuerzo.
+        </p>
+
+        <!-- Breathing Rules Box -->
+        <div class="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 text-left flex flex-col gap-3">
+          <div class="flex items-start gap-3">
+            <div class="p-1 bg-amber-500/10 rounded text-amber-500"><i data-lucide="arrow-up" class="w-4 h-4"></i></div>
+            <div>
+              <p class="text-xs font-bold text-white">Al esforzarte (Empuje / Fuerza):</p>
+              <p class="text-[11px] text-slate-400">Exhala de forma constante con los labios fruncidos como si soplaras una vela.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="p-1 bg-emerald-500/10 rounded text-emerald-500"><i data-lucide="arrow-down" class="w-4 h-4"></i></div>
+            <div>
+              <p class="text-xs font-bold text-white">Al regresar (Fase Excéntrica):</p>
+              <p class="text-[11px] text-slate-400">Inhala aire llenando tus costados sin inflar el abdomen agresivamente.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: RESET, ADJUSTMENTS & ALARM OVERLAY -->
+    <div id="tab-ajustes-content" class="absolute inset-0 bg-slate-950/98 z-20 flex flex-col hidden overflow-y-auto no-scrollbar pb-20">
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+        <h2 class="font-bold text-sm tracking-widest text-slate-200 uppercase">CONFIGURACIÓN Y ALARMAS</h2>
+        <button onclick="switchTab('entrenamiento')" class="text-xs text-slate-400 border border-slate-800 px-3 py-1 rounded bg-slate-900">Volver</button>
+      </div>
+
+      <div class="p-4 flex-1 flex flex-col gap-4">
+        
+        <!-- DAILY ALARM PROGRAMMER -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col gap-3">
+          <div class="flex items-center gap-2 text-emerald-400">
+            <i data-lucide="bell" class="w-4.5 h-4.5"></i>
+            <h3 class="text-xs font-bold tracking-widest uppercase">Alarma de Entrenamiento</h3>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Programa un recordatorio táctico diario para mantener la constancia en tus 15 minutos diarios durante los 30 días de misión.
+          </p>
+          
+          <div class="grid grid-cols-2 gap-3 mt-1">
+            <div>
+              <label class="text-[10px] text-slate-400 uppercase font-bold block mb-1">Hora de Alarma</label>
+              <input type="time" id="alarm-time-input" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-sm font-bold text-white focus:outline-none focus:border-emerald-500 transition-colors">
+            </div>
+            <div class="flex flex-col justify-end">
+              <button id="toggle-alarm-btn" onclick="saveAlarmSettings()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold py-2.5 px-3 rounded-xl text-[11px] uppercase tracking-wider btn-active transition-all">
+                Guardar Alarma
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-2 bg-slate-950 rounded-xl border border-slate-800 mt-1">
+            <span class="text-[11px] text-slate-300 font-medium">Estado del recordatorio:</span>
+            <div class="flex items-center gap-2">
+              <span id="alarm-status-text" class="text-[10px] font-black text-slate-500 uppercase">Apagado</span>
+              <button onclick="toggleAlarmActive()" id="alarm-switch" class="w-10 h-6 bg-slate-800 rounded-full p-1 transition-all duration-200">
+                <div id="alarm-switch-knob" class="w-4 h-4 bg-slate-500 rounded-full transition-transform duration-200"></div>
+              </button>
+            </div>
+          </div>
+          
+          <button onclick="testBuzzerSound()" class="text-[10px] text-slate-500 hover:text-emerald-400 transition-colors flex items-center gap-1 justify-center mt-1">
+            <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Probar tono militar de alarma
+          </button>
+        </div>
+
+        <!-- NEW DAILY WATER ALARM PROGRAMMER -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col gap-3">
+          <div class="flex items-center gap-2 text-blue-400">
+            <i data-lucide="droplet" class="w-4.5 h-4.5"></i>
+            <h3 class="text-xs font-bold tracking-widest uppercase">Alarmas de Hidratación</h3>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Activa las alarmas acústicas que sonarán a las <strong class="text-blue-300">6 AM, 9 AM, 12 PM, 3 PM y 6 PM</strong> para recordarte tomar tus 500 ml de agua.
+          </p>
+
+          <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+            <span class="text-[11px] text-slate-300 font-medium">Alertas de Agua (Tono Gota):</span>
+            <div class="flex items-center gap-2">
+              <span id="water-alarm-status-text" class="text-[10px] font-black text-slate-500 uppercase">Apagado</span>
+              <button onclick="toggleWaterAlarmActive()" id="water-alarm-switch" class="w-10 h-6 bg-slate-800 rounded-full p-1 transition-all duration-200">
+                <div id="water-alarm-switch-knob" class="w-4 h-4 bg-slate-500 rounded-full transition-transform duration-200"></div>
+              </button>
+            </div>
+          </div>
+
+          <button onclick="testWaterDropletSound()" class="text-[10px] text-slate-500 hover:text-blue-400 transition-colors flex items-center gap-1 justify-center py-1 bg-slate-950/40 rounded-lg border border-slate-800/80 btn-active">
+            <i data-lucide="droplets" class="w-3.5 h-3.5"></i> Probar tono de gota de agua
+          </button>
+        </div>
+
+        <!-- Target Weight Loss parameters -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col gap-2.5">
+          <div class="flex items-center gap-2 text-amber-500">
+            <i data-lucide="trending-down" class="w-4.5 h-4.5"></i>
+            <h3 class="text-xs font-bold tracking-widest uppercase">Estrategia de Quema Grasa</h3>
+          </div>
+          <ul class="text-[11px] text-slate-300 space-y-2 leading-relaxed">
+            <li>• <strong class="text-emerald-400">Lunes a Viernes:</strong> Movimiento metabólico de 15 minutos adaptado a tus capacidades biológicas actuales.</li>
+            <li>• <strong class="text-emerald-400">Protección Articular:</strong> Sentadillas reducidas a 60 grados. Los estiramientos de cadera restauran el líquido sinovial protegiendo la rótula.</li>
+            <li>• <strong class="text-emerald-400">Seguridad Hernia:</strong> Estabilización de core profundo isométrico (Bird-dog y Deadbug) sin presionar el abdomen.</li>
+            <li>• <strong class="text-emerald-400">Hidratación Constante:</strong> Beber agua cada 3 horas lubrica tus articulaciones, estimula tu metabolismo y desintoxica el organismo.</li>
+          </ul>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="bg-red-950/20 border border-red-500/20 rounded-xl p-4 flex flex-col gap-3">
+          <h3 class="text-xs font-bold tracking-widest text-red-400 uppercase">Zona de Control</h3>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Si deseas comenzar tu reto de 30 días desde cero, puedes borrar el historial guardado localmente de forma segura.
+          </p>
+          <button onclick="showResetConfirmation()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-xl text-xs uppercase tracking-wider btn-active">
+            Reiniciar Misión Semanal
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERACTIVE INFO & SAFETY MODAL -->
+    <div id="safety-modal" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity duration-300 pointer-events-none opacity-0">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 overflow-hidden shadow-2xl flex flex-col gap-4">
+        <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+          <div class="p-2 bg-amber-500/10 rounded-lg text-amber-500">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-sm">REGLAS MILITARES DE SALUD</h3>
+            <p class="text-[10px] text-slate-400">Protección en tus 15 minutos diarios</p>
+          </div>
+        </div>
+        
+        <div class="text-xs space-y-3 text-slate-300 overflow-y-auto max-h-60 no-scrollbar">
+          <div class="p-2.5 bg-slate-950 rounded border-l-2 border-red-500">
+            <strong class="text-red-400 block mb-1">1. Respiración Antihinia</strong>
+            Exhala siempre en el esfuerzo (al subir en flexiones o empujes). No mantengas la respiración ni empujes el abdomen.
+          </div>
+          <div class="p-2.5 bg-slate-950 rounded border-l-2 border-amber-500">
+            <strong class="text-amber-400 block mb-1">2. Cero Impacto en Rodilla</strong>
+            No hagas saltos, ni permitas que tu flexión de rodilla pase de 90° o el punto donde sientas dolor.
+          </div>
+          <div class="p-2.5 bg-slate-950 rounded border-l-2 border-emerald-500">
+            <strong class="text-emerald-400 block mb-1">3. Adaptación de Peso</strong>
+            A los 51 años y con 95 kg, cada repetición lenta vale por tres rápidas. Controla cada fase de bajada lenta durante 3 segundos.
+          </div>
+        </div>
+
+        <button onclick="toggleSafetyModal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider btn-active">
+          Entendido, Comenzar
+        </button>
+      </div>
+    </div>
+
+    <!-- ACTIVE ALARM SCREEN INTERACTIVE SCREEN -->
+    <div id="alarm-trigger-screen" class="hidden absolute inset-0 bg-slate-950/98 backdrop-blur-xl z-50 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-300 pointer-events-none opacity-0">
+      <div class="relative w-28 h-28 mb-8 flex items-center justify-center">
+        <!-- Radar Circles -->
+        <div class="absolute inset-0 rounded-full bg-red-600/20 alarm-glow"></div>
+        <div class="absolute inset-2 rounded-full bg-red-600/30 alarm-glow" style="animation-delay: 0.5s"></div>
+        <div class="relative w-16 h-16 rounded-full bg-red-600 text-white border border-red-500 flex items-center justify-center shadow-2xl">
+          <i data-lucide="bell" class="w-8 h-8 animate-bounce"></i>
+        </div>
+      </div>
+      
+      <span class="text-[10px] bg-red-500/20 text-red-400 font-extrabold px-3 py-1 rounded-full border border-red-500/30 tracking-widest uppercase">¡ALERTA DE MISIÓN!</span>
+      <h2 class="text-2xl font-black text-white mt-4 tracking-tight">HOLA, ES HORA DE ENTRENAR</h2>
+      <p class="text-xs text-slate-400 mt-2 max-w-xs leading-relaxed">
+        Tus 15 minutos diarios de fuerza y quema de grasa te esperan. Protege tu rodilla, controla tu respiración y supera la meta hoy.
+      </p>
+
+      <div class="flex flex-col gap-2.5 w-full max-w-xs mt-10">
+        <button onclick="dismissTriggeredAlarm(true)" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3 px-4 rounded-xl text-xs uppercase tracking-wider btn-active transition-all">
+          Iniciar Entrenamiento
+        </button>
+        <button onclick="dismissTriggeredAlarm(false)" class="w-full bg-slate-900 border border-slate-800 text-slate-400 font-bold py-2.5 px-4 rounded-xl text-[10px] uppercase tracking-wider btn-active transition-all">
+          Posponer 5 Minutos
+        </button>
+      </div>
+    </div>
+
+    <!-- ACTIVE WATER ALARM TRIGGER SCREEN -->
+    <div id="water-alarm-trigger-screen" class="hidden absolute inset-0 bg-slate-950/98 backdrop-blur-xl z-50 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-300 pointer-events-none opacity-0">
+      <div class="relative w-28 h-28 mb-8 flex items-center justify-center">
+        <!-- Water Ripple Effect -->
+        <div class="absolute inset-0 rounded-full bg-blue-500/20 alarm-glow"></div>
+        <div class="absolute inset-2 rounded-full bg-blue-500/30 alarm-glow" style="animation-delay: 0.5s"></div>
+        <div class="relative w-16 h-16 rounded-full bg-blue-500 text-white border border-blue-400 flex items-center justify-center shadow-2xl water-wave">
+          <i data-lucide="droplet" class="w-8 h-8"></i>
+        </div>
+      </div>
+      
+      <span class="text-[10px] bg-blue-500/20 text-blue-400 font-extrabold px-3 py-1 rounded-full border border-blue-500/30 tracking-widest uppercase">¡MISIÓN HIDRATACIÓN!</span>
+      <h2 class="text-2xl font-black text-white mt-4 tracking-tight" id="water-alert-title">ES HORA DE BEBER AGUA</h2>
+      <p class="text-xs text-slate-400 mt-2 max-w-xs leading-relaxed">
+        Bebe <span class="text-blue-400 font-bold">500 ml</span> de agua para asegurar un metabolismo activo, lubricar las articulaciones de tu rodilla y mantener elástica tu fascia abdominal.
+      </p>
+
+      <div class="flex flex-col gap-2.5 w-full max-w-xs mt-10">
+        <button onclick="dismissWaterAlarm(true)" class="w-full bg-blue-500 hover:bg-blue-400 text-slate-950 font-black py-3 px-4 rounded-xl text-xs uppercase tracking-wider btn-active transition-all shadow-lg shadow-blue-900/40">
+          Ya lo tomé (Marcar Copa)
+        </button>
+        <button onclick="dismissWaterAlarm(false)" class="w-full bg-slate-900 border border-slate-800 text-slate-400 font-bold py-2.5 px-4 rounded-xl text-[10px] uppercase tracking-wider btn-active transition-all">
+          Cerrar Alerta
+        </button>
+      </div>
+    </div>
+
+    <!-- SYSTEM ALERTS/NOTIFICATION TOAST (Replaces native alerts) -->
+    <div id="custom-alert" class="absolute top-4 left-4 right-4 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+      <div class="bg-emerald-500 text-slate-950 p-3.5 rounded-xl shadow-2xl flex items-center gap-3">
+        <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0"></i>
+        <p class="text-xs font-bold" id="alert-message">Notificación</p>
+      </div>
+    </div>
+
+    <!-- RESET CONFIRMATION MODAL -->
+    <div id="confirm-reset-modal" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity duration-300 pointer-events-none opacity-0">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 shadow-2xl flex flex-col gap-4 text-center">
+        <div class="mx-auto p-3 bg-red-500/10 text-red-500 rounded-full w-12 h-12 flex items-center justify-center">
+          <i data-lucide="trash-2" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-white text-sm">¿Reiniciar Semana?</h3>
+          <p class="text-xs text-slate-400 mt-1">Esta acción borrará todas tus marcas de entrenamiento de la semana actual de forma definitiva.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <button onclick="cancelReset()" class="py-2.5 bg-slate-800 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider btn-active">Cancelar</button>
+          <button onclick="confirmReset()" class="py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-wider btn-active">Reiniciar</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- APP DATA CONFIGURATION WITH BLUEPRINT SCHEMATICS ---
+    const ROUTINES = {
+      lunes: {
+        id: 'lunes',
+        name: 'LUNES',
+        type: 'SESIÓN A',
+        subtitle: 'Fuerza Continuada de Empuje (Pecho, Hombro y Core)',
+        color: 'emerald',
+        restDay: false,
+        exercises: [
+          {
+            id: 'a1',
+            title: 'Flexiones Inclinadas',
+            repTarget: 'Intervalo de 40s Trabajo / 20s Recuperación',
+            sets: 3,
+            rest: '60s',
+            safety: 'Apoya las manos en pared o mesa firme. Cuerpo alineado. Exhala profundamente al empujar el cuerpo.',
+            instructions: 'Baja controlando el peso durante 3 segundos. El pecho debe apuntar hacia el apoyo sin forzar hombros.',
+            svg: `
+              <svg viewBox="0 0 200 100" class="w-full h-28 bg-slate-950 rounded-xl border border-slate-800/80 p-1">
+                <rect width="100%" height="100%" fill="#020617" />
+                <path d="M 0 10 H 200 M 0 20 H 200 M 0 30 H 200 M 0 40 H 200 M 0 50 H 200 M 0 60 H 200 M 0 70 H 200 M 0 80 H 200 M 0 90 H 200" stroke="#1e293b" stroke-width="0.5" />
+                <path d="M 10 0 V 100 M 20 0 V 100 M 30 0 V 100 M 40 0 V 100 M 50 0 V 100 M 60 0 V 100 M 70 0 V 100 M 80 0 V 100 M 90 0 V 100 M 100 0 V 100 M 110 0 V 100 M 120 0 V 100 M 130 0 V 100 M 140 0 V 100 M 150 0 V 100 M 160 0 V 100 M 170 0 V 100 M 180 0 V 100 M 190 0 V 100" stroke="#1e293b" stroke-width="0.5" />
+                <line x1="140" y1="35" x2="140" y2="85" stroke="#475569" stroke-width="4" stroke-linecap="round" />
+                <line x1="130" y1="35" x2="150" y2="35" stroke="#475569" stroke-width="3" />
+                <line x1="20" y1="85" x2="180" y2="85" stroke="#334155" stroke-dasharray="2,2" stroke-width="1.5" />
+                <line x1="60" y1="80" x2="135" y2="40" stroke="#10b981" stroke-width="4" class="blueprint-line" stroke-linecap="round" />
+                <circle cx="138" cy="34" r="5" fill="#10b981" class="blueprint-line" />
+                <line x1="120" y1="48" x2="132" y2="48" stroke="#38bdf8" stroke-width="2" class="blueprint-accent" stroke-linecap="round" />
+                <line x1="132" y1="48" x2="135" y2="43" stroke="#38bdf8" stroke-width="2" class="blueprint-accent" />
+                <circle cx="60" cy="80" r="3" fill="#10b981" />
+                <text x="10" y="20" fill="#475569" font-size="7" font-family="monospace">BLUEPRINT V1.0 | PUSH-UP</text>
+              </svg>
+            `
+          },
+          {
+            id: 'a2',
+            title: 'Bird-Dog (Perro de Caza)',
+            repTarget: 'Intervalo de 40s Trabajo / 20s Recuperación',
+            sets: 3,
+            rest: '60s',
+            safety: 'En cuadrupedia. Evita arquear la zona lumbar. Contrae el transverso (abdomen hacia adentro) sin bloquear el aire.',
+            instructions: 'Extiende brazo y pierna opuesta de forma alterna. No retengas la respiración.',
+            svg: `
+              <svg viewBox="0 0 200 100" class="w-full h-28 bg-slate-950 rounded-xl border border-slate-800/80 p-1">
+                <rect width="100%" height="100%" fill="#020617" />
+                <path d="M 0 10 H 200 M 0 20 H 200 M 0 30 H 200 M 0 40 H 200 M 0 50 H 200 M 0 60 H 200 M 0 70 H 200 M 0 80 H 200 M 0 90 H 200" stroke="#1e293b" stroke-width="0.5" />
+                <path d="M 10 0 V 100 M 20 0 V 100 M 30 0 V 100 M 40 0 V 100 M 50 0 V 100 M 60 0 V 100 M 70 0 V 100 M 80 0 V 100 M 90 0 V 100 M 100 0 V 100 M 110 0 V 100 M 120 0 V 100 M 130 0 V 100 M 140 0 V 100 M 150 0 V 100 M 160 0 V 100 M 170 0 V 100 M 180 0 V 100 M 190 0 V 100" stroke="#1e293b" stroke-width="0.5" />
+                <line x1="20" y1="80" x2="180" y2="80" stroke="#334155" stroke-dasharray="2,2" stroke-width="1.5" />
+                <line x1="100" y1="55" x2="100" y2="80" stroke="#38bdf8" stroke-width="3" class="blueprint-accent" />
+                <line x1="120" y1="55" x2="120" y2="80" stroke="#38bdf8" stroke-width="3" class="blueprint-accent" />
+                <line x1="75" y1="55" x2="130" y2="55" stroke="#10b981" stroke-width="4" class="blueprint-line" />
+                <circle cx="138" cy="51" r="5" fill="#10b981" />
+                <line x1="130" y1="55" x2="165" y2="55" stroke="#10b981" stroke-width="3" stroke-linecap="round" class="blueprint-line" />
+                <line x1="75" y1="55" x2="40" y2="55" stroke="#10b981" stroke-width="3" stroke-linecap="round" class="blueprint-line" />
+                <line x1="35" y1="55" x2="170" y2="55" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3,3" />
+                <text x="10" y="20" fill="#475569" font-size="7" font-family="monospace">BLUEPRINT V1.0 | BIRD-DOG</text>
+              </svg>
+            `
+          }
+        ]
+      },
+      martes: {
+        id: 'martes',
+        name: 'MARTES',
+        type: 'SESIÓN B (MOVILIDAD Y CORE)',
+        subtitle: 'Protección de Cadera, Espalda y Core Secundario',
+        color: 'sky',
+        restDay: false,
+        exercises: [
+          {
+            id: 'b1_mov',
+            title: 'Deadbug (Escarabajo Muerto)',
+            repTarget: 'Intervalo de 40s Trabajo / 20s Recuperación',
+            sets: 3,
+            rest: '30s',
+            safety: 'Espalda baja presionando activamente la colchoneta. Ideal para el core profundo sin forzar la hernia.',
+            instructions: 'Boca arriba, rodillas a 90 grados. Baja brazo y pierna contraria de forma alterna y pausada.',
+            svg: `
+              <svg viewBox="0 0 200 100" class="w-full h-28 bg-slate-950 rounded-xl border border-slate-800/80 p-1">
+                <rect width="100%" height="100%" fill="#020617" />
+                <path d="M 0 10 H 200 M 0 20 H 200 M 0 30 H 200 M 0 40 H 200 M 0 50 H 200 M 0 60 H 200 M 0 70 H 200 M 0 80 H 200 M 0 90 H 200" stroke="#1e293b" stroke-width="0.5" />
+                <line x1="20" y1="80" x2="180" y2="80" stroke="#334155" stroke-dasharray="2,2" stroke-width="1.5" />
+                <rect x="75" y="75" width="50" height="5" fill="#475569" />
+                <line x1="100" y1="75" x2="100" y2="50" stroke="#10b981" stroke-width="4" class="blueprint-line" />
+                <path d="M 100 75 H 120 V 55" fill="none" stroke="#10b981" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" class="blueprint-line" />
+                <path d="M 100 75 H 80 V 75" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" class="blueprint-accent" />
+                <circle cx="100" cy="44" r="5" fill="#10b981" />
+                <text x="10" y="20" fill="#475569" font-size="7" font-family="monospace">BLUEPRINT V1.0 | DEADBUG</text>
+              </svg>
+            `
+          },
+          {
+            id: 'b2_mov',
+            title: 'Estiramiento Pasivo de Cadera',
+            repTarget: '3 series de 30 segundos por pierna',
+            sets: 3,
+            rest: '30s',
+            safety: 'Si sientes molestia en la rótula, coloca una almohadilla suave bajo tu rodilla de apoyo.',
+            instructions: 'Desplaza ligeramente la pelvis al frente para abrir flexores de cadera sin arquear la espalda lumbar.',
+            svg: `
+              <svg viewBox="0 0 200 100" class="w-full h-28 bg-slate-950 rounded-xl border border-slate-800/80 p-1">
+                <rect width="100%" height="100%" fill="#020617" />
+                <path d="M 0 10 H 200 M 0 20 H 200 M 0 30 H 200 M 0 40 H 200 M 0 50 H 200 M 0 60 H 200 M 0 70 H 200 M 0 80 H 200 M 0 90 H 200" stroke="#1e293b" stroke-width="0.5" />
+                <line x1="20" y1="85" x2="180" y2="85" stroke="#334155" stroke-dasharray="2,2" stroke-width="1.5" />
+                <path d="M 80 85 V 55 H 115 V 85" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="blueprint-line" />
+                <circle cx="115" cy="46" r="5" fill="#10b981" />
+                <text x="10" y="20" fill="#475569" font-size="7" font-family="monospace">BLUEPRINT V1.0 | LUNGE STRETCH</text>
+              </svg>
+            `
+          }
+        ]
+      },
+      miercoles: {
+        id: 'miercoles',
+        name: 'MIÉRCOLES',
+        type: 'SESIÓN C',
+        subtitle: 'Fuerza de Tracción y Cadena Posterior (Espalda y Glúteos)',
+        color: 'indigo',
+        restDay: false,
+        exercises: [
+          {
+            id: 'c1',
+            title: 'Remo con Toalla o Invertido',
+            repTarget: 'Intervalo de 40s Trabajo / 20s Recuperación',
+            sets: 3,
+            rest: '60s',
+            safety: 'Cuerpo recto como una tabla. No jales con sacudidas. Mantén los hombros lejos de las orejas.',
+            instructions: 'Baja despacio y sube exhalando. No dobles las rodillas más de 20 grados.',
+            svg: `
+              <svg viewBox="0 0 200 100" class="w-full h-28 bg-slate-950 rounded-xl border border-slate-800/80 p-1">
+                <rect width="100%" height="100%" fill="#020617" />
+                <path d="M 0 10 H 200 M 0 20 H 200 M 0 30 H 200 M 0 40 H 200 M 0 50 H 200 M 0 60 H 200 M 0 70 H 200 M 0 80 H 200 M 0 90 H 200" stroke="#1e293b" stroke-width="0.5" />
+                <path d="M 10 0 V 100 M 20 0 V 100 M 30 0 V 100 M 40 0 V 100 M 50 0 V 100 M 60 0 V 100 M 70 0 V 100 M 80 0 V 100 M 90 0 V 100 M 100 0 V 100 M 110 0 V 100 M 120 0 V 100 M 130 0 V 100 M 140 0 V 100 M 150 0 V 100 M 160 0 V 100 M 170 0 V 100 M 180 0 V 100 M 190 0 V 100" stroke="#1e293b" stroke-width="0.5" />
+                <line x1="20" y1="85" x2="180" y2="85" stroke="#334155" stroke-dasharray="2,2" stroke-width="1.5" />
+                <line x1="60" y1="20" x2="60" y2="85" stroke="#475569" stroke-width="4" stroke-linecap="round" />
+                <line x1="60" y1="45" x2="110" y2="52" stroke="#38bdf8" stroke-dasharray="2,1" stroke-width="2.5" class="blueprint-accent" />
+                <line x1="120" y1="80" x2="95" y2="35" stroke="#10b981" stroke-width="4" class="blueprint-line" stroke-linecap="round" />
+                <circle cx="91" cy="28" r="5" fill="#10b981" />
+                <text x="10" y="20" fill="#475569" font-size="7" font-family="monospace">BLUEPRINT V1.0 | TOWEL ROW</text>
+              </svg>
+            `
+          },
+          {
+            id: 'c2',
+            title: 'Puente de Glúteos',
+            repTarget: 'Intervalo de 40s Trabajo / 20s Recuperación',
+            sets: 3,
+            rest: '60s',
+            safety: 'Fortalece la parte trasera de tu cuerpo sin ejercer compresión ni torsión dolorosa en tus rodillas.',
+            instructions: 'Boca arriba, rodillas dobladas, pies apoyados. Eleva la cadera activando glúteos al máximo.',
+            svg: `
+              <svg viewBox="0 0 200 100" class="w-full h-28 bg-slate-950 rounded-xl border border-slate-800/80 p-1">
+                <rect width="100%" height="100%" fill="#020617" />
+                <path d="M 0 10 H 200 M 0 20 H 200 M 0 30 H 200 M 0 40 H 200 M 0 50 H 200 M 0 60 H 200 M 0 70 H 200 M 0 80 H 200 M 0 90 H 200" stroke="#1e293b" stroke-width="0.5" />
+                <line x1="20" y1="80" x2="180" y2="80" stroke="#475569" stroke-width="2" />
+                <line x1="60" y1="80" x2="70" y2="80" stroke="#38bdf8" stroke-width="3" />
+                <line x1="140" y1="80" x2="150" y2="80" stroke="#38bdf8" stroke-width="3" />
+                <path d="M 65 80 L 105 50 L 145 80" fill="none" stroke="#10b981" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" class="blueprint-line" />
+                <circle cx="154" cy="77" r="4.5" fill="#10b981" />
+                <text x="10" y="20" fill="#475569" font-size="7" font-family="monospace">BLUEPRINT V1.0 | GLUTE BRIDGE</text>
+              </svg>
+            `
+          }
+        ]
+      },
+      jueves: {
+        id: 'jueves',
+        name: 'JUEVES',
+        type: 'SESIÓN D (ESTABILIDAD POSTURAL)',
+        subtitle: 'Soporte Lumbar y Equilibrio de Rodilla',
+        color: 'amber',
+        restDay: false,
+        exercises: [
+          {
+            id: 'd1_mov',
+            title: 'Paseo del Granjero Modificado',
+            repTarget: '3 series x 45 segundos',
+            sets: 3,
+            rest: '60s',
+            safety: 'Sujeta botellas de agua o mancuernas moderadas. No aguantes la respiración. Postura militar impecable.',
+            instructions: 'Camina lento por el espacio manteniendo una perfecta alineación postural sin inclinarte.',
+            svg: `
+              <svg viewBox="0 0 200 100" class="w-full h-28 bg-slate-950 rounded-xl border border-slate-800/80 p-1">
+                <rect width="100%" height="100%" fill="#020617" />
+                <path d="M 0 10 H 200 M 0 20 H 200 M 0 30 H 200 M 0 40 H 200 M 0 50 H 200 M 0 60 H 200 M 0 70 H 200 M 0 80 H 200 M 0 90 H 200" stroke="#1e293b" stroke-width="0.5" />
+                <line x1="20" y1="85" x2="180" y2="85" stroke="#334155" stroke-dasharray="2,2" stroke-width="1.5" />
+                <line x1="100" y1="35" x2="100" y2="85" stroke="#10b981" stroke-width="4.5" stroke-linecap="round" class="blueprint-line" />
+                <circle cx="100" cy="27" r="5" fill="#10b981" />
+                <line x1="100" y1="42" x2="104" y2="60" stroke="#10b981" stroke-width="3.5" class="blueprint-line" />
+                <rect x="99" y="60" width="10" height="12" rx="1" fill="#38bdf8" class="blueprint-accent" />
+                <text x="10" y="20" fill="#475569" font-size="7" font-family="monospace">BLUEPRINT V1.0 | FARMER WALK</text>
+              </svg>
+            `
+          },
+          {
+            id: 'd2_mov',
+            title: 'Elevación de Talones Controlada',
+            repTarget: '3 series x 15 a 20 repeticiones',
+            sets: 3,
+            rest: '30s',
+            safety: 'Apóyate contra una pared para no perder el equilibrio y mantener la columna firme.',
+            instructions: 'Sube con potencia, mantén 1 segundo arriba y desciende en 3 segundos lentos.',
+            svg: `
+              <svg viewBox="0 0 200 100" class="w-full h-28 bg-slate-950 rounded-xl border border-slate-800/80 p-1">
+                <rect width="100%" height="100%" fill="#020617" />
+                <path d="M 0 10 H 200 M 0 20 H 200 M 0 30 H 200 M 0 40 H 200 M 0 50 H 200 M 0 60 H 200 M 0 70 H 200 M 0 80 H 200 M 0 90 H 200" stroke="#1e293b" stroke-width="0.5" />
+                <line x1="100" y1="20" x2="100" y2="80" stroke="#10b981" stroke-width="4" class="blueprint-line" />
+                <circle cx="100" cy="14" r="5" fill="#10b981" />
+                <line x1="100" y1="80" x2="115" y2="72" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" class="blueprint-accent" />
+                <line x1="70" y1="82" x2="130" y2="82" stroke="#475569" stroke-dasharray="2,2" />
+                <text x="10" y="20" fill="#475569" font-size="7" font-family="monospace">BLUEPRINT V1.0 | CALF RAISE</text>
+              </svg>
+            `
+          }
+        ]
+      },
+      viernes: {
+        id: 'viernes',
+        name: 'VIERNES',
+        type: 'SESIÓN E',
+        subtitle: 'Circuito Quema Grasa Full Body (Resistencia y Metabolismo)',
+        color: 'rose',
+        restDay: false,
+        exercises: [
+          {
+            id: 'e1',
+            title: 'Sentadilla Isométrica (Wall Sit)',
+            repTarget: 'Intervalo de 30s Trabajo / 30s Recuperación',
+            sets: 3,
+            rest: '60s',
+            safety: 'No bajes la cadera más de 60 grados para eliminar la presión patelar. Espalda apoyada.',
+            instructions: 'Apoya la espalda en la pared, pies separados al ancho de hombros, mantén la posición fija.',
+            svg: `
+              <svg viewBox="0 0 200 100" class="w-full h-28 bg-slate-950 rounded-xl border border-slate-800/80 p-1">
+                <rect width="100%" height="100%" fill="#020617" />
+                <path d="M 0 10 H 200 M 0 20 H 200 M 0 30 H 200 M 0 40 H 200 M 0 50 H 200 M 0 60 H 200 M 0 70 H 200 M 0 80 H 200 M 0 90 H 200" stroke="#1e293b" stroke-width="0.5" />
+                <line x1="20" y1="85" x2="180" y2="85" stroke="#475569" stroke-width="2" />
+                <line x1="125" y1="15" x2="125" y2="85" stroke="#475569" stroke-width="4" stroke-linecap="round" />
+                <path d="M 125 45 H 95 V 85" fill="none" stroke="#10b981" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" class="blueprint-line" />
+                <line x1="125" y1="25" x2="125" y2="45" stroke="#10b981" stroke-width="5" class="blueprint-line" />
+                <circle cx="125" cy="18" r="4.5" fill="#10b981" />
+                <text x="10" y="20" fill="#475569" font-size="7" font-family="monospace">BLUEPRINT V1.0 | WALL SIT</text>
+              </svg>
+            `
+          },
+          {
+            id: 'e2',
+            title: 'Prensa de Hombros de Pie',
+            repTarget: 'Intervalo de 40s Trabajo / 20s Recuperación',
+            sets: 3,
+            rest: '60s',
+            safety: 'Usa botellas de agua o mancuernas muy ligeras. Empuja estrictamente hacia arriba. Exhala intensamente al elevar.',
+            instructions: 'No arquees la zona lumbar mientras empujas. Mantén las rodillas destrabadas.',
+            svg: `
+              <svg viewBox="0 0 200 100" class="w-full h-28 bg-slate-950 rounded-xl border border-slate-800/80 p-1">
+                <rect width="100%" height="100%" fill="#020617" />
+                <path d="M 0 10 H 200 M 0 20 H 200 M 0 30 H 200 M 0 40 H 200 M 0 50 H 200 M 0 60 H 200 M 0 70 H 200 M 0 80 H 200 M 0 90 H 200" stroke="#1e293b" stroke-width="0.5" />
+                <line x1="20" y1="85" x2="180" y2="85" stroke="#475569" stroke-width="2" />
+                <line x1="100" y1="45" x2="100" y2="85" stroke="#10b981" stroke-width="4.5" stroke-linecap="round" class="blueprint-line" />
+                <circle cx="100" cy="37" r="5" fill="#10b981" />
+                <path d="M 100 48 H 112 V 22" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="blueprint-accent" />
+                <rect x="107" y="15" width="10" height="7" rx="1" fill="#f59e0b" />
+                <text x="10" y="20" fill="#475569" font-size="7" font-family="monospace">BLUEPRINT V1.0 | OVERHEAD PRESS</text>
+              </svg>
+            `
+          }
+        ]
+      },
+      sabado: {
+        id: 'sabado',
+        name: 'SÁBADO',
+        type: 'DÍA DE IGLESIA ⛪',
+        subtitle: 'Descanso Espiritual y Comunitario',
+        color: 'slate',
+        restDay: true,
+        instructions: 'Hoy es tu día dedicado a la iglesia y la comunidad. Disfruta de un merecido descanso biológico completo. No se programan ejercicios de fuerza.'
+      },
+      domingo: {
+        id: 'domingo',
+        name: 'DOMINGO',
+        type: 'DÍA FAMILIAR 👨‍👩‍👦',
+        subtitle: 'Recreación y Recarga de Energía',
+        color: 'slate',
+        restDay: true,
+        instructions: 'Día consagrado a tu familia. Aprovecha para caminar de forma recreativa y recargar energías para arrancar con fuerza la próxima semana.'
+      }
+    };
+
+    // --- STATE MANAGEMENT ---
+    let currentTab = 'entrenamiento';
+    let currentSelectedDay = 'lunes';
+    let completedSetsState = {}; // Structure: { [exerciseId_setIndex]: true/false }
+    let waterLogState = [false, false, false, false, false]; // 5 glasses of 500ml (2.5L)
+
+    // 15 Min Workout Timer Variables
+    let mainTimerInterval = null;
+    let mainTimerTimeLeft = 900; // 15 mins * 60 secs
+    let mainTimerRunning = false;
+    const mainTimerDuration = 900;
+
+    // Daily Alarm System Variables
+    let alarmTime = null;
+    let alarmActive = false;
+    let alarmCheckerInterval = null;
+
+    // Daily Water Alarm Variables
+    let waterAlarmActive = false;
+    let currentTriggeredWaterIndex = -1;
+
+    // Water Alarm Times Schedule: 6 AM, 9 AM, 12 PM, 3 PM, 6 PM
+    const waterAlarmTimes = ["06:00", "09:00", "12:00", "15:00", "18:00"];
+    const waterLabelMap = ["6:00 AM", "9:00 AM", "12:00 PM", "3:00 PM", "6:00 PM"];
+
+    // --- INITIALIZATION ---
+    window.onload = function() {
+      // Load saved user state
+      loadProgressFromStorage();
+      loadAlarmFromStorage();
+      loadWaterFromStorage();
+
+      // Automatically select today's day of week
+      const weekdayNames = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+      const todayIndex = new Date().getDay();
+      currentSelectedDay = weekdayNames[todayIndex];
+
+      // Setup UI & Listeners
+      buildDayTabs();
+      loadDayWorkout(currentSelectedDay);
+      updateWeeklyProgress();
+      setupAlarmChecker();
+      updateWaterUI();
+      
+      // Initialize Lucide Icons
+      lucide.createIcons();
+
+      // Breathing visual pacer alternate sync
+      const pacerCircle = document.getElementById('pacer-circle');
+      const pacerText = document.getElementById('pacer-text');
+      setInterval(() => {
+        if (pacerText.innerText === 'INHALA') {
+          pacerText.innerText = 'EXHALA';
+          pacerCircle.classList.remove('text-emerald-300');
+          pacerCircle.classList.add('text-amber-300');
+        } else {
+          pacerText.innerText = 'INHALA';
+          pacerCircle.classList.remove('text-amber-300');
+          pacerCircle.classList.add('text-emerald-300');
+        }
+      }, 2500);
+
+      // Request browser notification permissions on first load nicely
+      if ("Notification" in window && Notification.permission === "default") {
+        setTimeout(() => {
+          Notification.requestPermission();
+        }, 5000);
+      }
+    }
+
+    // --- LOCAL STORAGE SERVICES ---
+
+    function loadProgressFromStorage() {
+      const savedProgress = localStorage.getItem('calistenia_militar_progress');
+      if (savedProgress) {
+        completedSetsState = JSON.parse(savedProgress);
+      }
+    }
+
+    function loadAlarmFromStorage() {
+      const savedAlarmTime = localStorage.getItem('calistenia_alarm_time');
+      const savedAlarmActive = localStorage.getItem('calistenia_alarm_active');
+      const savedWaterAlarmActive = localStorage.getItem('calistenia_water_alarm_active');
+      
+      if (savedAlarmTime) {
+        document.getElementById('alarm-time-input').value = savedAlarmTime;
+        alarmTime = savedAlarmTime;
+      } else {
+        document.getElementById('alarm-time-input').value = "08:00";
+        alarmTime = "08:00";
+      }
+
+      if (savedAlarmActive === "true") {
+        alarmActive = true;
+        updateAlarmUI(true);
+      } else {
+        alarmActive = false;
+        updateAlarmUI(false);
+      }
+
+      if (savedWaterAlarmActive === "true") {
+        waterAlarmActive = true;
+        updateWaterAlarmUI(true);
+      } else {
+        waterAlarmActive = false;
+        updateWaterAlarmUI(false);
+      }
+    }
+
+    function loadWaterFromStorage() {
+      const savedWater = localStorage.getItem('calistenia_water_log');
+      const savedWaterDate = localStorage.getItem('calistenia_water_date');
+      const todayString = new Date().toDateString();
+
+      // If it is a new day, automatically reset water logs
+      if (savedWaterDate !== todayString) {
+        waterLogState = [false, false, false, false, false];
+        localStorage.setItem('calistenia_water_log', JSON.stringify(waterLogState));
+        localStorage.setItem('calistenia_water_date', todayString);
+      } else if (savedWater) {
+        waterLogState = JSON.parse(savedWater);
+      }
+    }
+
+    // --- WATER INTAKE TRACKER ---
+
+    function toggleWaterGlass(index) {
+      waterLogState[index] = !waterLogState[index];
+      localStorage.setItem('calistenia_water_log', JSON.stringify(waterLogState));
+      
+      const todayString = new Date().toDateString();
+      localStorage.setItem('calistenia_water_date', todayString);
+      
+      updateWaterUI();
+      
+      if (waterLogState[index]) {
+        showCustomToast("💧 +500 ml registrados. ¡Mantente hidratado!");
+      }
+    }
+
+    function updateWaterUI() {
+      let count = 0;
+      waterLogState.forEach((logged, i) => {
+        const btn = document.getElementById(`glass-${i}`);
+        if (!btn) return;
+        
+        if (logged) {
+          count++;
+          btn.className = "py-2.5 rounded-xl border border-blue-400 bg-blue-950/60 flex flex-col items-center justify-center gap-1 btn-active transition-all text-blue-400 font-bold shadow-md shadow-blue-950/40";
+        } else {
+          btn.className = "py-2.5 rounded-xl border border-slate-800 bg-slate-950 flex flex-col items-center justify-center gap-1 btn-active transition-all text-slate-500 hover:border-slate-700";
+        }
+      });
+
+      const totalLiters = (count * 0.5).toFixed(1);
+      document.getElementById('water-progress-text').innerText = `${totalLiters} / 2.5 Litros`;
+      
+      // Update progress bar width
+      const barPercentage = (count / 5) * 100;
+      document.getElementById('water-progress-bar').style.width = `${barPercentage}%`;
+    }
+
+    function resetWaterProgress() {
+      waterLogState = [false, false, false, false, false];
+      localStorage.setItem('calistenia_water_log', JSON.stringify(waterLogState));
+      updateWaterUI();
+      showCustomToast("🔄 Registro de agua reiniciado.");
+    }
+
+    // --- ALARM MANAGEMENT SYSTEM ---
+
+    function saveAlarmSettings() {
+      const timeVal = document.getElementById('alarm-time-input').value;
+      if (!timeVal) return;
+
+      alarmTime = timeVal;
+      localStorage.setItem('calistenia_alarm_time', alarmTime);
+      
+      alarmActive = true;
+      localStorage.setItem('calistenia_alarm_active', "true");
+      
+      updateAlarmUI(true);
+      showCustomToast("🔔 ¡Recordatorio diario guardado con éxito!");
+    }
+
+    function toggleAlarmActive() {
+      alarmActive = !alarmActive;
+      localStorage.setItem('calistenia_alarm_active', alarmActive ? "true" : "false");
+      updateAlarmUI(alarmActive);
+      
+      if (alarmActive) {
+        showCustomToast("🔔 Recordatorio activado");
+      } else {
+        showCustomToast("🔕 Recordatorio desactivado");
+      }
+    }
+
+    function updateAlarmUI(active) {
+      const switchKnob = document.getElementById('alarm-switch-knob');
+      const switchBg = document.getElementById('alarm-switch');
+      const statusText = document.getElementById('alarm-status-text');
+      const banner = document.getElementById('alarm-banner');
+      const bannerTime = document.getElementById('alarm-banner-time');
+
+      if (active) {
+        switchKnob.style.transform = "translateX(16px)";
+        switchKnob.classList.replace('bg-slate-500', 'bg-emerald-400');
+        switchBg.classList.replace('bg-slate-800', 'bg-emerald-950');
+        statusText.innerText = "Activo";
+        statusText.className = "text-[10px] font-black text-emerald-400 uppercase";
+        
+        banner.classList.remove('hidden');
+        bannerTime.innerText = alarmTime;
+      } else {
+        switchKnob.style.transform = "translateX(0px)";
+        switchKnob.classList.replace('bg-emerald-400', 'bg-slate-500');
+        switchBg.classList.replace('bg-emerald-950', 'bg-slate-800');
+        statusText.innerText = "Apagado";
+        statusText.className = "text-[10px] font-black text-slate-500 uppercase";
+        
+        banner.classList.add('hidden');
+      }
+    }
+
+    // --- NEW WATER ALARM METHODS ---
+
+    function toggleWaterAlarmActive() {
+      waterAlarmActive = !waterAlarmActive;
+      localStorage.setItem('calistenia_water_alarm_active', waterAlarmActive ? "true" : "false");
+      updateWaterAlarmUI(waterAlarmActive);
+      
+      if (waterAlarmActive) {
+        showCustomToast("💧 Alarmas de hidratación activadas");
+      } else {
+        showCustomToast("🔕 Alarmas de hidratación apagadas");
+      }
+    }
+
+    function updateWaterAlarmUI(active) {
+      const switchKnob = document.getElementById('water-alarm-switch-knob');
+      const switchBg = document.getElementById('water-alarm-switch');
+      const statusText = document.getElementById('water-alarm-status-text');
+
+      if (active) {
+        switchKnob.style.transform = "translateX(16px)";
+        switchKnob.classList.replace('bg-slate-500', 'bg-blue-400');
+        switchBg.classList.replace('bg-slate-800', 'bg-blue-950');
+        statusText.innerText = "Activo";
+        statusText.className = "text-[10px] font-black text-blue-400 uppercase";
+      } else {
+        switchKnob.style.transform = "translateX(0px)";
+        switchKnob.classList.replace('bg-blue-400', 'bg-slate-500');
+        switchBg.classList.replace('bg-blue-950', 'bg-slate-800');
+        statusText.innerText = "Apagado";
+        statusText.className = "text-[10px] font-black text-slate-500 uppercase";
+      }
+    }
+
+    function setupAlarmChecker() {
+      alarmCheckerInterval = setInterval(() => {
+        const now = new Date();
+        const currentHours = now.getHours().toString().padStart(2, '0');
+        const currentMinutes = now.getMinutes().toString().padStart(2, '0');
+        const currentTimeString = `${currentHours}:${currentMinutes}`;
+        const todayDate = now.toDateString();
+
+        // 1. Check Workout Alarm
+        if (alarmActive && alarmTime && currentTimeString === alarmTime) {
+          const lastFired = localStorage.getItem('calistenia_alarm_last_fired');
+          if (lastFired !== `${todayDate}_${alarmTime}`) {
+            localStorage.setItem('calistenia_alarm_last_fired', `${todayDate}_${alarmTime}`);
+            triggerActiveAlarmScreen();
+          }
+        }
+
+        // 2. Check Water Alarms
+        if (waterAlarmActive) {
+          const matchedIndex = waterAlarmTimes.indexOf(currentTimeString);
+          if (matchedIndex !== -1) {
+            // Check if user has NOT already drunk this water index
+            if (!waterLogState[matchedIndex]) {
+              const lastWaterFired = localStorage.getItem('calistenia_water_alarm_last_fired');
+              if (lastWaterFired !== `${todayDate}_${currentTimeString}`) {
+                localStorage.setItem('calistenia_water_alarm_last_fired', `${todayDate}_${currentTimeString}`);
+                triggerWaterAlarmScreen(matchedIndex);
+              }
+            }
+          }
+        }
+      }, 20000); // Check every 20s
+    }
+
+    // --- ACUSTIC SYNTHESIZERS ---
+
+    function testBuzzerSound() {
+      playBuzzerSoundLoop(3);
+      showCustomToast("🎵 Probando tono del sintetizador...");
+    }
+
+    function playBuzzerSoundLoop(beepsLeft) {
+      if (beepsLeft <= 0) return;
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const playBeep = (time, freq) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, time);
+          
+          gain.gain.setValueAtTime(0, time);
+          gain.gain.linearRampToValueAtTime(0.08, time + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, time + 0.25);
+          
+          osc.start(time);
+          osc.stop(time + 0.3);
+        };
+
+        const now = audioCtx.currentTime;
+        playBeep(now, 880);
+        playBeep(now + 0.15, 880);
+        
+        setTimeout(() => {
+          playBuzzerSoundLoop(beepsLeft - 1);
+        }, 700);
+      } catch (e) {
+        console.error("Audio API error:", e);
+      }
+    }
+
+    // NEW WATER DROPLET SYNTHESIZER
+    function testWaterDropletSound() {
+      playWaterDropletSound();
+      showCustomToast("💧 Probando tono de gota de agua...");
+    }
+
+    function playWaterDropletSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const playBubble = (delay, freqStart, freqEnd) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freqStart, audioCtx.currentTime + delay);
+          osc.frequency.exponentialRampToValueAtTime(freqEnd, audioCtx.currentTime + delay + 0.15);
+          
+          gain.gain.setValueAtTime(0, audioCtx.currentTime + delay);
+          gain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + delay + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + 0.15);
+          
+          osc.start(audioCtx.currentTime + delay);
+          osc.stop(audioCtx.currentTime + delay + 0.16);
+        };
+        
+        // Play double ascending drop
+        playBubble(0, 400, 1200);
+        playBubble(0.12, 500, 1500);
+      } catch (e) {
+        console.error("Audio error:", e);
+      }
+    }
+
+    // --- ALARM TRIGGERS MODALS ---
+
+    let alarmSoundInterval = null;
+    function triggerActiveAlarmScreen() {
+      const modal = document.getElementById('alarm-trigger-screen');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100', 'pointer-events-auto');
+      }, 10);
+
+      playBuzzerSoundLoop(2);
+      alarmSoundInterval = setInterval(() => {
+        playBuzzerSoundLoop(2);
+      }, 3000);
+
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("🚨 Misión 15 Minutos", {
+          body: "¡Hola! Tu sesión de calistenia para bajar de peso está programada para ahora.",
+          tag: "calistenia_militar_reminder"
+        });
+      }
+    }
+
+    function dismissTriggeredAlarm(startWorkout) {
+      if (alarmSoundInterval) {
+        clearInterval(alarmSoundInterval);
+        alarmSoundInterval = null;
+      }
+
+      const modal = document.getElementById('alarm-trigger-screen');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.remove('opacity-100', 'pointer-events-auto');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+
+      if (startWorkout) {
+        switchTab('entrenamiento');
+        if (!mainTimerRunning) {
+          toggleMainTimer();
+        }
+      } else {
+        const currentVal = document.getElementById('alarm-time-input').value;
+        const [h, m] = currentVal.split(':').map(Number);
+        let targetM = m + 5;
+        let targetH = h;
+        if (targetM >= 60) {
+          targetM -= 60;
+          targetH = (targetH + 1) % 24;
+        }
+        const postponedTime = `${targetH.toString().padStart(2, '0')}:${targetM.toString().padStart(2, '0')}`;
+        alarmTime = postponedTime;
+        document.getElementById('alarm-time-input').value = postponedTime;
+        localStorage.setItem('calistenia_alarm_time', alarmTime);
+        updateAlarmUI(true);
+        showCustomToast(`⏰ Recordatorio pospuesto por 5 minutos (${postponedTime})`);
+      }
+    }
+
+    // WATER ALARM MODAL TRIGGER
+    let waterAlarmSoundInterval = null;
+    function triggerWaterAlarmScreen(index) {
+      currentTriggeredWaterIndex = index;
+      
+      const modal = document.getElementById('water-alarm-trigger-screen');
+      document.getElementById('water-alert-title').innerText = `ES HORA DEL AGUA - ${waterLabelMap[index]}`;
+      
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100', 'pointer-events-auto');
+      }, 10);
+
+      // Play water sound loop
+      playWaterDropletSound();
+      waterAlarmSoundInterval = setInterval(() => {
+        playWaterDropletSound();
+      }, 2500);
+
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("💧 Misión Hidratación", {
+          body: `¡Atención! Es hora de tu vaso de agua de las ${waterLabelMap[index]}. ¡Mantén tus rodillas lubricadas!`,
+          tag: "calistenia_water_reminder"
+        });
+      }
+    }
+
+    function dismissWaterAlarm(checkAsDrunk) {
+      if (waterAlarmSoundInterval) {
+        clearInterval(waterAlarmSoundInterval);
+        waterAlarmSoundInterval = null;
+      }
+
+      const modal = document.getElementById('water-alarm-trigger-screen');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.remove('opacity-100', 'pointer-events-auto');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+
+      if (checkAsDrunk && currentTriggeredWaterIndex !== -1) {
+        toggleWaterGlass(currentTriggeredWaterIndex);
+      }
+      currentTriggeredWaterIndex = -1;
+    }
+
+    // --- 15 MINUTES MAIN TIMER SYSTEM ---
+
+    function toggleMainTimer() {
+      const btn = document.getElementById('main-timer-play-btn');
+      const stageDisplay = document.getElementById('timer-stage');
+
+      if (mainTimerRunning) {
+        clearInterval(mainTimerInterval);
+        mainTimerRunning = false;
+        btn.innerHTML = `<i data-lucide="play" class="w-5 h-5"></i>`;
+        lucide.createIcons();
+      } else {
+        mainTimerRunning = true;
+        btn.innerHTML = `<i data-lucide="pause" class="w-5 h-5"></i>`;
+        lucide.createIcons();
+
+        mainTimerInterval = setInterval(() => {
+          mainTimerTimeLeft--;
+          updateMainTimerUI();
+
+          if (mainTimerTimeLeft > 780) { // First 2 minutes
+            stageDisplay.innerText = "Calentamiento";
+            stageDisplay.className = "text-[10px] text-amber-400 font-bold uppercase px-2 py-0.5 bg-slate-900 rounded border border-slate-800";
+          } else if (mainTimerTimeLeft > 120) { // Middle 11 minutes
+            stageDisplay.innerText = "Circuito Activo";
+            stageDisplay.className = "text-[10px] text-emerald-400 font-bold uppercase px-2 py-0.5 bg-slate-900 rounded border border-slate-800";
+          } else if (mainTimerTimeLeft > 0) { // Last 2 minutes
+            stageDisplay.innerText = "Enfriamiento";
+            stageDisplay.className = "text-[10px] text-sky-400 font-bold uppercase px-2 py-0.5 bg-slate-900 rounded border border-slate-800";
+          } else {
+            clearInterval(mainTimerInterval);
+            mainTimerRunning = false;
+            btn.innerHTML = `<i data-lucide="play" class="w-5 h-5"></i>`;
+            lucide.createIcons();
+            
+            playBuzzerSoundLoop(3);
+            showCustomToast("🎉 ¡Meta cumplida! Misión diaria completada.");
+            markCurrentDayFullyCompleted();
+          }
+        }, 1000);
+      }
+    }
+
+    function resetMainTimer() {
+      clearInterval(mainTimerInterval);
+      mainTimerRunning = false;
+      mainTimerTimeLeft = 900; // Reset to 15 mins
+      updateMainTimerUI();
+
+      const btn = document.getElementById('main-timer-play-btn');
+      btn.innerHTML = `<i data-lucide="play" class="w-5 h-5"></i>`;
+      
+      const stageDisplay = document.getElementById('timer-stage');
+      stageDisplay.innerText = "Calentamiento";
+      stageDisplay.className = "text-[10px] text-amber-500 font-bold uppercase px-2 py-0.5 bg-slate-900 rounded border border-slate-800";
+      
+      lucide.createIcons();
+    }
+
+    function updateMainTimerUI() {
+      const mins = Math.floor(mainTimerTimeLeft / 60);
+      const secs = mainTimerTimeLeft % 60;
+      document.getElementById('main-timer-display').innerText = 
+        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+      const percentage = (mainTimerTimeLeft / mainTimerDuration) * 100;
+      document.getElementById('main-timer-progress').style.width = `${percentage}%`;
+    }
+
+    // --- VIEW BUILDERS ---
+
+    function buildDayTabs() {
+      const tabContainer = document.getElementById('day-tabs');
+      tabContainer.innerHTML = '';
+      
+      const weekdays = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+      
+      weekdays.forEach(dayId => {
+        const dayData = ROUTINES[dayId];
+        const isSelected = dayId === currentSelectedDay;
+        const isCompleted = checkIfDayIsFullyCompleted(dayId);
+        
+        let tabClass = "flex-1 py-2 px-1 text-center rounded-xl border flex flex-col items-center justify-center transition-all duration-200 cursor-pointer btn-active ";
+        if (isSelected) {
+          tabClass += "bg-emerald-600 border-emerald-500 text-white font-bold shadow-lg shadow-emerald-950/40";
+        } else {
+          tabClass += "bg-slate-900 border-slate-800 text-slate-400 font-medium hover:bg-slate-800/80 hover:border-slate-700";
+        }
+
+        let isRestClass = dayData.restDay ? "border-dashed opacity-75" : "";
+
+        tabContainer.innerHTML += `
+          <div onclick="selectDay('${dayId}')" class="${tabClass} ${isRestClass} relative">
+            <span class="text-[10px] tracking-tight uppercase">${dayData.name.substring(0, 3)}</span>
+            <div class="mt-1 flex items-center justify-center">
+              ${isCompleted && !dayData.restDay ? 
+                `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle-2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>` : 
+                (dayData.restDay ? 
+                  `<span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>` : 
+                  `<span class="w-1.5 h-1.5 rounded-full bg-transparent"></span>`
+                )
+              }
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function loadDayWorkout(dayId) {
+      currentSelectedDay = dayId;
+      const dayData = ROUTINES[dayId];
+      
+      document.getElementById('current-day-name').innerText = dayData.name;
+      document.getElementById('current-day-type').innerText = dayData.type;
+      
+      const bannerBg = document.getElementById('day-banner-bg');
+      const statusPill = document.getElementById('current-day-status-pill');
+      
+      bannerBg.className = "p-4 rounded-xl flex justify-between items-center transition-colors duration-300 ";
+      if (dayData.restDay) {
+        bannerBg.className += "bg-slate-800 border border-slate-700 text-slate-300";
+        statusPill.className = "text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider bg-slate-700 text-slate-300";
+        statusPill.innerText = "Descanso";
+      } else {
+        const isFinished = checkIfDayIsFullyCompleted(dayId);
+        if (isFinished) {
+          bannerBg.className += "bg-emerald-950/85 border border-emerald-500/30 text-white";
+          statusPill.className = "text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider bg-emerald-500 text-slate-950 shadow-md shadow-emerald-950/50";
+          statusPill.innerText = "Completado";
+        } else {
+          bannerBg.className += "bg-indigo-950/85 border border-indigo-500/30 text-white";
+          statusPill.className = "text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider bg-indigo-500 text-slate-950";
+          statusPill.innerText = "Pendiente";
+        }
+      }
+
+      const workoutContent = document.getElementById('workout-content');
+      workoutContent.innerHTML = '';
+
+      if (dayData.restDay) {
+        let restIconG = dayId === 'sabado' ? 
+          `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-amber-500"><path d="m12 3-1.912 5.886H3.886L9.673 12.5l-2.21 6.8 5.766-4.148 5.766 4.148-2.21-6.8 5.787-3.614h-6.202L12 3z"/></svg>` : 
+          `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-sky-400"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
+
+        workoutContent.innerHTML = `
+          <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 text-center flex flex-col items-center gap-4">
+            <div class="p-3.5 bg-slate-800 rounded-2xl">
+              ${restIconG}
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-base">${dayData.subtitle}</h4>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed max-w-xs mx-auto font-medium">
+                ${dayData.instructions}
+              </p>
+            </div>
+            <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 text-left w-full">
+              <span class="text-[10px] text-emerald-400 font-extrabold uppercase tracking-widest block mb-1">🔥 TIP MILITAR DE ADAPTACIÓN</span>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                A los 51 años, el sobreentrenamiento es el enemigo número uno de tus articulaciones. Respetar estos dos días libres de cargas es crucial para sanar tu rodilla.
+              </p>
+            </div>
+          </div>
+        `;
+      } else {
+        dayData.exercises.forEach((ex, exIndex) => {
+          workoutContent.innerHTML += `
+            <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-4 flex flex-col gap-3 transition-all duration-300">
+              <!-- Header Section -->
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2">
+                    <span class="text-[11px] bg-slate-800 text-slate-400 font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider">EJERCICIO ${exIndex + 1}</span>
+                    <span class="text-[11px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-md">${ex.rest} Descanso</span>
+                  </div>
+                  <h4 class="font-black text-white text-base mt-1.5 leading-tight">${ex.title}</h4>
+                  <p class="text-xs text-slate-400 font-semibold mt-1">${ex.repTarget}</p>
+                </div>
+                
+                <!-- Quick Info Icon -->
+                <button onclick="toggleDetails('${ex.id}')" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors btn-active">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-help-circle"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                </button>
+              </div>
+
+              <!-- HIGH-FIDELITY VECTOR DIAGRAM -->
+              <div class="w-full">
+                ${ex.svg}
+              </div>
+
+              <!-- COLLAPSIBLE DETAILS FOR TECHNIQUE & SAFETY -->
+              <div id="details-${ex.id}" class="hidden p-3 bg-slate-950 border border-slate-800/80 rounded-xl flex flex-col gap-2.5 transition-all">
+                <div>
+                  <span class="text-[10px] text-amber-400 font-extrabold uppercase tracking-widest block mb-1">🛡️ SEGURIDAD HERNIA Y RODILLA</span>
+                  <p class="text-[11px] text-slate-300 leading-relaxed">${ex.safety}</p>
+                </div>
+                <div class="h-px bg-slate-800"></div>
+                <div>
+                  <span class="text-[10px] text-emerald-400 font-extrabold uppercase tracking-widest block mb-1">🛠️ INSTRUCCIONES DE EJECUCIÓN</span>
+                  <p class="text-[11px] text-slate-400 leading-relaxed">${ex.instructions}</p>
+                </div>
+              </div>
+
+              <!-- Series Tick Tracker -->
+              <div class="mt-1">
+                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-2">Marca cada serie que completes en la ronda:</span>
+                <div class="grid grid-cols-3 gap-2">
+                  ${generateSetsCheckboxes(ex)}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      }
+    }
+
+    function generateSetsCheckboxes(ex) {
+      let html = '';
+      for (let i = 0; i < ex.sets; i++) {
+        const key = `${ex.id}_${i}`;
+        const isChecked = completedSetsState[key] === true;
+        
+        let btnClass = "py-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 cursor-pointer btn-active ";
+        if (isChecked) {
+          btnClass += "bg-emerald-500 border-emerald-400 text-slate-950 font-black";
+        } else {
+          btnClass += "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700 hover:bg-slate-900";
+        }
+        
+        html += `
+          <button onclick="toggleSet('${ex.id}', ${i})" class="${btnClass}">
+            <span>Ronda ${i + 1}</span>
+            <div class="w-3.5 h-3.5 rounded-full flex items-center justify-center ${isChecked ? 'bg-slate-950' : 'bg-slate-800'}">
+              ${isChecked ? `<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+            </div>
+          </button>
+        `;
+      }
+      return html;
+    }
+
+    // --- LOGIC FUNCTIONS ---
+
+    function selectDay(dayId) {
+      loadDayWorkout(dayId);
+      buildDayTabs();
+    }
+
+    function toggleDetails(exerciseId) {
+      const detailsDiv = document.getElementById(`details-${exerciseId}`);
+      if (detailsDiv.classList.contains('hidden')) {
+        detailsDiv.classList.remove('hidden');
+      } else {
+        detailsDiv.classList.add('hidden');
+      }
+    }
+
+    function toggleSet(exerciseId, setIndex) {
+      const key = `${exerciseId}_${setIndex}`;
+      completedSetsState[key] = !completedSetsState[key];
+      
+      localStorage.setItem('calistenia_militar_progress', JSON.stringify(completedSetsState));
+      
+      loadDayWorkout(currentSelectedDay);
+      buildDayTabs();
+      updateWeeklyProgress();
+
+      if (completedSetsState[key]) {
+        showCustomToast("¡Ronda del circuito completada!");
+      }
+    }
+
+    function markCurrentDayFullyCompleted() {
+      const dayData = ROUTINES[currentSelectedDay];
+      if (dayData.restDay) return;
+
+      dayData.exercises.forEach(ex => {
+        for (let i = 0; i < ex.sets; i++) {
+          completedSetsState[`${ex.id}_${i}`] = true;
+        }
+      });
+
+      localStorage.setItem('calistenia_militar_progress', JSON.stringify(completedSetsState));
+      loadDayWorkout(currentSelectedDay);
+      buildDayTabs();
+      updateWeeklyProgress();
+    }
+
+    function checkIfDayIsFullyCompleted(dayId) {
+      const dayData = ROUTINES[dayId];
+      if (dayData.restDay) return false;
+
+      let allDone = true;
+      dayData.exercises.forEach(ex => {
+        for (let i = 0; i < ex.sets; i++) {
+          if (!completedSetsState[`${ex.id}_${i}`]) {
+            allDone = false;
+          }
+        }
+      });
+      return allDone;
+    }
+
+    function updateWeeklyProgress() {
+      let totalSeries = 0;
+      let completedSeries = 0;
+
+      Object.keys(ROUTINES).forEach(dayId => {
+        const dayData = ROUTINES[dayId];
+        if (!dayData.restDay) {
+          dayData.exercises.forEach(ex => {
+            totalSeries += ex.sets;
+            for (let i = 0; i < ex.sets; i++) {
+              if (completedSetsState[`${ex.id}_${i}`]) {
+                completedSeries++;
+              }
+            }
+          });
+        }
+      });
+
+      const percentage = totalSeries > 0 ? Math.round((completedSeries / totalSeries) * 100) : 0;
+      
+      document.getElementById('weekly-percentage').innerText = `${percentage}% de Misión`;
+      
+      const streakText = document.getElementById('streak-counter');
+      if (percentage === 100) {
+        streakText.innerText = "¡Misión semanal completada con absoluto honor!";
+      } else if (percentage >= 60) {
+        streakText.innerText = "Adherencia sólida. Excelente ritmo de quema calórica.";
+      } else if (percentage > 0) {
+        streakText.innerText = "Mantén la constancia de tus 15 min diarios.";
+      } else {
+        streakText.innerText = "¡Listo para tu semana de entrenamiento (Lunes a Viernes)!";
+      }
+
+      const ring = document.getElementById('progress-ring-circle');
+      const offset = 175.92 - (percentage / 100) * 175.92;
+      ring.style.strokeDashoffset = offset;
+    }
+
+    // --- NAVIGATION TABS ---
+
+    function switchTab(tabId) {
+      document.getElementById('tab-respiracion-content').classList.add('hidden');
+      document.getElementById('tab-ajustes-content').classList.add('hidden');
+
+      document.getElementById('nav-entrenamiento').className = "flex flex-col items-center justify-center text-slate-400 transition-colors py-1";
+      document.getElementById('nav-respiracion').className = "flex flex-col items-center justify-center text-slate-400 transition-colors py-1";
+      document.getElementById('nav-ajustes').className = "flex flex-col items-center justify-center text-slate-400 transition-colors py-1";
+
+      currentTab = tabId;
+
+      if (tabId === 'entrenamiento') {
+        document.getElementById('nav-entrenamiento').className = "flex flex-col items-center justify-center text-emerald-400 transition-colors py-1";
+      } else if (tabId === 'respiracion') {
+        document.getElementById('tab-respiracion-content').classList.remove('hidden');
+        document.getElementById('nav-respiracion').className = "flex flex-col items-center justify-center text-emerald-400 transition-colors py-1";
+      } else if (tabId === 'ajustes') {
+        document.getElementById('tab-ajustes-content').classList.remove('hidden');
+        document.getElementById('nav-ajustes').className = "flex flex-col items-center justify-center text-emerald-400 transition-colors py-1";
+      }
+    }
+
+    // --- SAFETY AND CONFIRMATION MODALS ---
+
+    function toggleSafetyModal() {
+      const modal = document.getElementById('safety-modal');
+      if (modal.classList.contains('hidden')) {
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          modal.classList.remove('opacity-0', 'pointer-events-none');
+          modal.classList.add('opacity-100', 'pointer-events-auto');
+        }, 10);
+      } else {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.classList.remove('opacity-100', 'pointer-events-auto');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+        }, 300);
+      }
+    }
+
+    // --- SYSTEM TOASTS ---
+
+    function showCustomToast(message) {
+      const toast = document.getElementById('custom-alert');
+      document.getElementById('alert-message').innerText = message;
+      
+      toast.classList.remove('opacity-0', '-translate-y-20', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-20', 'pointer-events-none');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 3000);
+    }
+
+    // --- RESET DATA SYSTEM ---
+
+    function showResetConfirmation() {
+      const modal = document.getElementById('confirm-reset-modal');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100', 'pointer-events-auto');
+      }, 10);
+    }
+
+    function cancelReset() {
+      const modal = document.getElementById('confirm-reset-modal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.remove('opacity-100', 'pointer-events-auto');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    function confirmReset() {
+      completedSetsState = {};
+      localStorage.removeItem('calistenia_militar_progress');
+      
+      loadDayWorkout(currentSelectedDay);
+      buildDayTabs();
+      updateWeeklyProgress();
+      cancelReset();
+      switchTab('entrenamiento');
+      
+      showCustomToast("🔄 Misión reiniciada. ¡A por esos 30 días!");
+    }
+  </script>
+</body>
+</html>
